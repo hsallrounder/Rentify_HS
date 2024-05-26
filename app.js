@@ -80,7 +80,7 @@ app.get('/viewProperties', isAuthenticated, async (req, res) => {
 
 
 app.post('/signup', async (req, res) => {
-    const { firstName, lastName, email, phone, password, type } = req.body; 
+    const { firstName, lastName, email, phone, password, type } = req.body;
     const saltRounds = 10;
 
     const user = await User.findOne({ email });
@@ -253,12 +253,10 @@ app.post('/properties/:propertyId/dislike', async (req, res) => {
             return res.status(404).json({ message: 'Property not found' });
         }
 
-        // Check if user already disliked the property
         if (property.dislikes.includes(email)) {
             return res.status(400).json({ message: 'You already disliked this property' });
         }
 
-        // Update dislikes array and save the property
         property.dislikes.push(email);
         if (property.likes.includes(email)) {
             property.likes = property.likes.filter(id => id !== email);
@@ -272,6 +270,36 @@ app.post('/properties/:propertyId/dislike', async (req, res) => {
     }
 });
 
+const isNumeric = (value) => !isNaN(parseFloat(value)) && isFinite(value);
+
+app.get('/searchProperties', async (req, res) => {
+    try {
+        const searchQuery = req.query.searchQuery;
+        
+        const regex = new RegExp(searchQuery, 'i');
+        
+        const fieldsToSearch = {
+            $or: [
+                { areaName: regex },
+                { amenities: regex },
+                isNumeric(searchQuery) ? { plotSize: searchQuery } : {},
+                isNumeric(searchQuery) ? { bedrooms: searchQuery } : {},
+                isNumeric(searchQuery) ? { bathrooms: searchQuery } : {},
+            ].filter(obj => Object.keys(obj).length !== 0),
+        };
+        
+        const properties = await Property.find(fieldsToSearch)
+        .select({ seller_id: 0, password: 0, likes: 0, dislikes: 0 });
+        
+        
+        res.render('templates/viewProperty.ejs', { properties });
+    } catch (err) {
+        console.error("Error occurred:", err);
+        res.status(500).send("An error occurred while processing your request.");
+    }
+});
+
+
 
 app.get('/logout', function (req, res, next) {
     req.session.user = null
@@ -283,6 +311,26 @@ app.get('/logout', function (req, res, next) {
         })
     })
 })
+
+app.post('/getSeller/:propertyId', async (req, res) => {
+    const _id = new ObjectId(req.params.propertyId);
+    try {
+        const propertyDetails = await Property.findById(_id);
+        if (!propertyDetails) {
+            return res.status(404).json({ error: 'Property not found' });
+        }
+
+        const sellerDetails = await User.findOne({ 'email': propertyDetails.seller_id });
+        if (!sellerDetails) {
+            return res.status(404).json({ error: 'Seller details not found' });
+        }
+
+        res.send({ ...sellerDetails });
+    } catch (error) {
+        console.error('Error fetching seller details:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
 
 
 const transporter = nodemailer.createTransport({
@@ -319,12 +367,12 @@ const buyerEmailContent = (propertyAreaName, propertyPlotSize, propertyBedrooms,
 
 
 app.post('/send-email/:propertyId', async (req, res) => {
-    
+
     const buyerDetails = await User.findOne({ 'email': req.session.email });
-    
+
     const _id = new ObjectId(req.params.propertyId);
     const propertyDetails = await Property.findById(_id);
-    
+
     const sellerDetails = await User.findOne({ 'email': propertyDetails.seller_id });
 
     // Generate email body for seller
@@ -341,10 +389,10 @@ app.post('/send-email/:propertyId', async (req, res) => {
         propertyDetails.plotSize,
         propertyDetails.bedrooms,
         propertyDetails.bathrooms,
-        sellerDetails.firstName, 
+        sellerDetails.firstName,
         sellerDetails.lastName,
-        sellerDetails.email,     
-        sellerDetails.phone      
+        sellerDetails.email,
+        sellerDetails.phone
     );
 
     const sellerSubject = `Interest in Your Property - ${propertyDetails.areaName}`;

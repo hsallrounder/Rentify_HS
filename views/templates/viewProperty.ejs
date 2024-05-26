@@ -18,6 +18,27 @@
             margin-bottom: 20px;
         }
 
+        .search-container {
+            display: flex;
+            padding-top: 20px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .search-container input {
+            padding: 10px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .search-container i {
+            margin-left: -30px;
+            color: #ccc;
+            cursor: pointer;
+        }
+
         .properties-container {
             display: flex;
             flex-wrap: wrap;
@@ -88,7 +109,11 @@
 
 <body>
     <h1>Available Properties</h1>
-    <button onclick="logout()" class=" btns lg-btn">Logout</button>
+    <button onclick="logout()" class="btns lgout-btn">Logout</button>
+    <div class="search-container">
+        <input type="text" id="searchProperties" placeholder="Search...">
+        <i onclick="searchProperties()" class="fa fa-search"></i>
+    </div>
     <% if (properties.length===0) { %>
         <p>No properties found.</p>
         <% } else { %>
@@ -106,7 +131,6 @@
                             <% if (property.amenities.length) { %>
                                 <h4>Amenities</h4>
                                 <% } %>
-
                                     <% for (const amenity of property.amenities) { %>
                                         <li>
                                             <%= amenity %>
@@ -118,16 +142,19 @@
                             <span style="padding: 10px; border: 2px solid black; border-radius: 3px; cursor: pointer;">
                                 <i onclick="like('<%= property._id %>')" class="far fa-thumbs-up"
                                     style="color: black;"></i>
-                                <%= property.likes.length %>
+                                <%= property.likes ? property.likes.length : 0 %>
                             </span>
                             <span style="padding: 10px; border: 2px solid black; border-radius: 3px; cursor: pointer;">
                                 <i onclick="dislike('<%= property._id %>')" class="far fa-thumbs-down"
                                     style="color: black;"></i>
-                                <%= property.dislikes.length %>
+                                <%= property.dislikes ? property.dislikes.length : 0 %>
                             </span>
                             <span style="padding: 10px; border: 2px solid black; border-radius: 3px; cursor: pointer;">
                                 <a onclick="sendEmail('<%= property._id %>')">I'm Interested.</a>
                             </span>
+                        </div>
+                        <div id="if-interested-<%= property._id %>" class="if-interested" style="visibility:hidden;">
+                            <!-- Seller Details Will be Shown Here-->
                         </div>
 
                     </div>
@@ -150,17 +177,37 @@
                         window.location.reload()
 
                     }
+
+                    async function searchProperties() {
+                        const searchElement = document.getElementById("searchProperties");
+                        const searchQuery = searchElement.value;
+                        window.location.href = `/searchProperties?searchQuery=${encodeURIComponent(searchQuery)}`;
+                    }
+
+
                     function logout() {
                         window.location.href = '/logout'
                     }
-                    async function sendEmail(propertyId){
-                        await fetch(`/send-email/${propertyId}`,{
+
+                    async function sendEmail(propertyId) {
+                        const sellerResponse = await fetch(`/getSeller/${propertyId}`, {
                             method: 'POST'
                         });
-                        alert("Thank You for showing interest. Kindly check your Email.");
+                        const SellerDetails = await sellerResponse.json();
+                        console.log(SellerDetails);
+                        const interested_id = document.getElementById(`if-interested-${propertyId}`);
+                        interested_id.innerHTML = `
+                            <h3>Seller Name: ${SellerDetails._doc.firstName} ${SellerDetails._doc.lastName}</h3>
+                            <p>Email Id: ${SellerDetails._doc.email}</p>
+                            <p>Phone: ${SellerDetails._doc.phone}</p>
+                            <p style="color: red;">Thank You for showing your interest. Kindly check your Email.</p>
+                        `;
+                        interested_id.style.visibility = 'visible';
+                        await fetch(`/send-email/${propertyId}`, {
+                            method: 'POST'
+                        });
                     }
                 </script>
 </body>
-
 
 </html>
