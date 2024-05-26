@@ -32,7 +32,7 @@ app.use(session({
 app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
-    res.render('HomePage');
+    res.render('HomePage.ejs');
 })
 
 function isAuthenticated(req, res, next) {
@@ -52,7 +52,7 @@ app.get('/signup', async (req, res) => {
             res.redirect('/viewProperties');
         }
     }
-    else res.render('auth/SignUp', { email_err: '', fname: '', lname: '', email: '', password: '', phone: '', type: '' });
+    else res.render('auth/SignUp.ejs', { email_err: '', fname: '', lname: '', email: '', password: '', phone: '', type: '' });
 })
 
 app.get('/login', async (req, res) => {
@@ -64,7 +64,7 @@ app.get('/login', async (req, res) => {
             res.redirect('/viewProperties');
         }
     }
-    else res.render('auth/Login', { err: '', email: '', password: '' });
+    else res.render('auth/Login.ejs', { err: '', email: '', password: '' });
 })
 
 
@@ -85,7 +85,7 @@ app.post('/signup', async (req, res) => {
 
     const user = await User.findOne({ email });
     if (user) {
-        res.render('auth/SignUp', { email_err: 'User Already Exists.', fname: firstName, lname: lastName, email: email, password: '', phone: phone, type: type });
+        res.render('auth/SignUp.ejs', { email_err: 'User Already Exists.', fname: firstName, lname: lastName, email: email, password: '', phone: phone, type: type });
     }
 
     try {
@@ -131,7 +131,7 @@ app.post('/login', async (req, res) => {
                     })
                 }
                 else {
-                    res.render('auth/Login', { err: 'Invalid email or password.', email: email, password: password });
+                    res.render('auth/Login.ejs', { err: 'Invalid email or password.', email: email, password: password });
                 }
             });
         } catch (err) {
@@ -139,7 +139,7 @@ app.post('/login', async (req, res) => {
         }
     }
     else {
-        res.render('auth/Login', { err: 'Invalid email or password.', email: email, password: password });
+        res.render('auth/Login.ejs', { err: 'Invalid email or password.', email: email, password: password });
     }
 })
 
