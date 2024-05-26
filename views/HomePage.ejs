@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus booking website</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f0f0f0; 
+    }
+
+    h1, h2 {
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      text-align: center;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #ddd; 
+    }
+
+    h1 {
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 0.9em;
+      color: #666;
+    }
+
+    main {
+      display: flex;
+      justify-content: center;
+      align-items: center; 
+      min-height: calc(100vh - 120px); 
+    }
+
+    .user-options {
+      background-color: #fff; 
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      margin-bottom: 15px;
+    }
+
+    .options {
+      display: flex;
+      justify-content: space-around;
+    }
+
+    a {
+      text-decoration: none; 
+      color: #333; 
+      padding: 10px 20px;
+      border: 1px solid #ddd; 
+      border-radius: 5px;
+      transition: all 0.2s ease-in-out;
+    }
+
+    a:hover {
+      background-color: #eee; 
+    }
+
+    @media screen and (max-width: 768px) {
+      h1 {
+        font-size: 1.5em;
+      }
+
+      .user-options {
+        width: 100%; 
+      }
+    }
+  </style>
+</head>
+<body>
+    <header>
+        <h1>Welcome to Rentify</h1>
+        <p>Rent or buy properties, as valuable as it can get!</p>
+    </header>
+
+    <main>
+        <section class="user-options">
+            <h2>Let's Begin !</h2>
+            <div class="options">
+                <a href="/login">Login</a>
+                <a href="/signup">Signup</a>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
